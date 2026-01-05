@@ -15,7 +15,7 @@
 - `examples/` 至少 3 个样例
 
 ### 验收
-- `--stage lexer` 可运行并生成 `out/.../tokens.csv`
+- `python -m src.main --mode cli --input examples/demo.min --stage lexer`可运行并生成 `out/demo/tokens.csv`
 
 ---
 
@@ -23,7 +23,7 @@
 
 ### 产出
 - Token 类型：关键字、标识符、数字、运算符、界符
-- Token 含 `type, lexeme, line, col`（至少 line/col）
+- Token 含 `index, type, lexeme, line, col`（至少 line/col）
 
 ### 验收
 - 对 `examples/` 全部样例输出 tokens，不崩溃，定位信息正确
@@ -131,6 +131,54 @@
 
 ### 验收
 - 跑一次命令即可在 `out/<name>/` 拿齐所有报告材料
+
+---
+
+### 样例策略
+
+* `examples/demo.min`：**canonical**
+  * M0–M3：保证可被读取并可生成对应阶段输出（允许 stub）。
+  * M4 起：合法样例必须 parse accept；M5 起可生成 IR；M8 起可生成 target.asm；M9 必须 stage all 全流程跑通。
+* `examples/expr.min`：表达式优先级/括号回归
+* `examples/control.min`：控制流与嵌套结构回归
+* `examples/bad.min`：错误提示回归（必须报英文 Error + expected tokens）
+* （可选）`examples/opt_showcase.min`：专门用来让优化效果“肉眼可见”
+
+### 每个 stage / milestone 的必跑样例
+
+* **stage=lexer（M1 起）**
+
+  * 必须通过（能 tokenize，不崩溃）：`demo.min`, `expr.min`, `control.min`, `bad.min`
+  * 备注：`bad.min` 在 lexer 阶段通常也应该能过（因为它只是语法错，不一定词法错）
+
+* **stage=table（M3）**
+
+  * 不依赖具体样例文件（只依赖 grammar）
+  * 验收点：生成 `action_goto.csv`，无冲突（或冲突能定位）
+
+* **stage=parse（M4）**
+
+  * 必须 accept：`demo.min`, `expr.min`, `control.min`
+  * 必须报错（英文 Error line:col + Expected tokens）：`bad.min`
+
+* **stage=ir（M5）**
+
+  * 必须生成合理 IR：`demo.min`（至少一个含 if/while 的样例）
+  * 推荐额外验证：`control.min`（结构更集中）
+
+* **stage=opt（M6+M7）**
+
+  * 必须不崩溃且控制流仍正确：`demo.min`
+  * 必须“优化前后有明显变化”：推荐用 `opt_showcase.min`（可选文件）
+
+* **stage=codegen（M8）**
+
+  * 必须生成 `target.asm` 且 label/jump 一致：`demo.min`（或 `control.min`）
+
+* **stage=all（M9）**
+
+  * 必须全流程跑通：`demo.min`
+  * 推荐（非必须但很加分）：`expr.min`、`control.min` 也能 all（至少跑到 parse/ir）
 
 ---
 
