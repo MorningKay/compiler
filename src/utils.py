@@ -1,0 +1,65 @@
+from __future__ import annotations
+
+import csv
+import os
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable, List
+
+
+class UserError(Exception):
+    """Raised for predictable, user-facing errors that should be shown as-is."""
+
+
+@dataclass
+class StageResult:
+    stage: str
+    output_dir: Path
+    generated: List[Path]
+    message: str | None = None
+
+
+def ensure_input_file(input_path: str | Path) -> Path:
+    """Validate that the input file exists and is readable."""
+    path = Path(input_path)
+    if not path.is_file():
+        raise UserError(f"Error: failed to read input file: {path} does not exist")
+    return path
+
+
+def output_dir_for_input(input_path: Path) -> Path:
+    """Return the output directory for the given input file (without creating it)."""
+    return Path("out") / input_path.stem
+
+
+def ensure_output_dir(input_path: Path) -> Path:
+    """Create and return the output directory for the given input file."""
+    out_dir = output_dir_for_input(input_path)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return out_dir
+
+
+def write_csv_with_header(path: Path, header: Iterable[str]) -> None:
+    """Write a CSV file containing only the header row."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as fp:
+        writer = csv.writer(fp)
+        writer.writerow(list(header))
+
+
+def write_text_file(path: Path, content: str) -> None:
+    """Write plain text content to a file, ensuring the directory exists."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+
+def open_folder(path: Path) -> None:
+    """Open a folder in the system file explorer, if possible."""
+    if sys.platform.startswith("darwin"):
+        subprocess.Popen(["open", str(path)])
+    elif os.name == "nt":
+        os.startfile(path)  # type: ignore[attr-defined]
+    else:
+        subprocess.Popen(["xdg-open", str(path)])

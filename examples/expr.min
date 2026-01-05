@@ -1,0 +1,7 @@
+// expr.min: precedence & parentheses
+
+a = 1 + 2 * 3;
+b = (1 + 2) * 3;
+c = (a + b) / 2;
+d = a - b - 1;
+e = a * (b + 3) / 2;

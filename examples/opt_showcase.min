@@ -1,0 +1,7 @@
+// opt_showcase.min: designed to show folding/propagation/copy/DCE effects
+
+a = 3 + 4;
+b = a + 1;
+c = a + 1;
+d = c;
+e = d;
