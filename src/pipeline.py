@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List
 
+from .lexer import tokenize
 from .utils import (
     StageResult,
     UserError,
@@ -10,6 +11,7 @@ from .utils import (
     ensure_output_dir,
     write_csv_with_header,
     write_text_file,
+    write_tokens_csv,
 )
 
 SUPPORTED_STAGES = ["lexer", "table", "parse", "ir", "opt", "codegen", "all"]
@@ -26,7 +28,7 @@ def run_stage(stage: str, input_path: str) -> StageResult:
     generated: List[Path] = []
 
     if normalized == "lexer":
-        generated.append(_emit_tokens(out_dir))
+        generated.append(_emit_tokens(source_path, out_dir))
     elif normalized == "table":
         generated.append(_emit_action_goto(out_dir))
     elif normalized == "parse":
@@ -38,14 +40,15 @@ def run_stage(stage: str, input_path: str) -> StageResult:
     elif normalized == "codegen":
         generated.append(_emit_target(out_dir))
     elif normalized == "all":
-        generated.extend(_run_all(out_dir))
+        generated.extend(_run_all(source_path, out_dir))
 
     return StageResult(stage=normalized, output_dir=out_dir, generated=generated)
 
 
-def _emit_tokens(out_dir: Path) -> Path:
+def _emit_tokens(source_path: Path, out_dir: Path) -> Path:
     path = out_dir / "tokens.csv"
-    write_csv_with_header(path, ["type", "lexeme", "line", "col"])
+    tokens = tokenize(source_path)
+    write_tokens_csv(path, tokens)
     return path
 
 
@@ -109,9 +112,9 @@ def _emit_target(out_dir: Path) -> Path:
     return path
 
 
-def _run_all(out_dir: Path) -> List[Path]:
+def _run_all(source_path: Path, out_dir: Path) -> List[Path]:
     generated: List[Path] = []
-    generated.append(_emit_tokens(out_dir))
+    generated.append(_emit_tokens(source_path, out_dir))
     generated.append(_emit_action_goto(out_dir))
     generated.append(_emit_parse_trace(out_dir))
     generated.append(_emit_ir(out_dir))

@@ -45,6 +45,32 @@ MiniLang 是一个教学用“小型语言”，用于覆盖课程选题 1~9 的
   - `index,type,lexeme,line,col`
 - `type` 使用稳定枚举名（例如 `ID/NUM/IF/PLUS/NE/...`）
 
+### 2.4 TokenType 命名约定（必须）
+
+tokens.csv 的 `type` 必须使用稳定枚举名（TokenType），不得使用以下形式：
+- 不得使用通用 `KEYWORD` 作为 type
+- 不得直接用符号本身（如 `=`, `+`, `(`, `!=`）作为 type
+
+必须使用如下枚举名（最小集合）：
+
+- 标识符/数字：
+  - `ID`, `NUM`
+
+- 关键字：
+  - `IF`, `ELSE`, `WHILE`, `AND`, `OR`（可选 `NOT`）
+
+- 运算符：
+  - `PLUS`(+), `MINUS`(-), `MUL`(*), `DIV`(/)
+  - `ASSIGN`(=)
+  - `EQ`(==), `NE`(!=), `LT`(<), `GT`(>)
+
+- 界符：
+  - `SEMI`(;)
+  - `LPAREN`(() , `RPAREN`())
+  - `LBRACE`({) , `RBRACE`(})
+
+`lexeme` 字段保留原始字符串（如 `if`, `!=`, `{`），用于展示与报错。
+
 ---
 
 ## 3. 语法规范（Grammar）

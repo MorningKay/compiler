@@ -6,7 +6,10 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, TYPE_CHECKING
+
+if TYPE_CHECKING:  # avoid circular import at runtime
+    from .lexer import Token
 
 
 class UserError(Exception):
@@ -47,6 +50,16 @@ def write_csv_with_header(path: Path, header: Iterable[str]) -> None:
     with path.open("w", encoding="utf-8", newline="") as fp:
         writer = csv.writer(fp)
         writer.writerow(list(header))
+
+
+def write_tokens_csv(path: Path, tokens: List["Token"]) -> None:
+    """Write tokens to CSV with the required header."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as fp:
+        writer = csv.writer(fp)
+        writer.writerow(["index", "type", "lexeme", "line", "col"])
+        for tok in tokens:
+            writer.writerow([tok.index, tok.type, tok.lexeme, tok.line, tok.col])
 
 
 def write_text_file(path: Path, content: str) -> None:

@@ -1,0 +1,9 @@
+a = 1; // comment
+b = 2;
+c = 0;
+
+if (a < b or a == b) {
+  c = 1;
+} else {
+  c = 2;
+}
