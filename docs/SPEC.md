@@ -171,6 +171,8 @@ IR 以“四元式”为主，形式可选其一（但需全项目统一）：
 - `opt_report.txt`
 - `target.asm`
 
+补充：EOF 终结符在代码内部统一命名为 `EOF`；在导出的 ACTION/GOTO 表列名或 parse trace 的剩余输入展示中，可将 `EOF` 显示为 `$`。
+
 ---
 
 ## 7. CLI 与 GUI 规范（必须）
