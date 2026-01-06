@@ -68,6 +68,30 @@ def write_text_file(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+def write_action_goto_csv(
+    path: Path,
+    terminals: List[str],
+    nonterminals: List[str],
+    action: dict[int, dict[str, str]],
+    goto_table: dict[int, dict[str, int]],
+) -> None:
+    """Write combined ACTION/GOTO CSV with stable ordering."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    max_state = max(action.keys()) if action else -1
+    headers = ["state"] + terminals + nonterminals
+    with path.open("w", encoding="utf-8", newline="") as fp:
+        writer = csv.writer(fp)
+        writer.writerow(headers)
+        for state in range(max_state + 1):
+            row: List[str | int] = [state]
+            for t in terminals:
+                row.append(action.get(state, {}).get(t, ""))
+            for nt in nonterminals:
+                goto_val = goto_table.get(state, {}).get(nt)
+                row.append("" if goto_val is None else goto_val)
+            writer.writerow(row)
+
+
 def open_folder(path: Path) -> None:
     """Open a folder in the system file explorer, if possible."""
     if sys.platform.startswith("darwin"):

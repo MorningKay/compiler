@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List
 
 from .lexer import tokenize
+from . import lalr
 from .utils import (
     StageResult,
     UserError,
@@ -12,6 +13,7 @@ from .utils import (
     write_csv_with_header,
     write_text_file,
     write_tokens_csv,
+    write_action_goto_csv,
 )
 
 SUPPORTED_STAGES = ["lexer", "table", "parse", "ir", "opt", "codegen", "all"]
@@ -54,7 +56,8 @@ def _emit_tokens(source_path: Path, out_dir: Path) -> Path:
 
 def _emit_action_goto(out_dir: Path) -> Path:
     path = out_dir / "action_goto.csv"
-    write_csv_with_header(path, ["state", "lookahead_or_nonterminal", "action"])
+    _, terminals, nonterminals, action, goto_table = lalr.generate_tables()
+    write_action_goto_csv(path, terminals, nonterminals, action, goto_table)
     return path
 
 

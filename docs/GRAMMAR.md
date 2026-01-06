@@ -48,7 +48,6 @@
 - `Matched`
 - `Unmatched`
 - `AssignStmt`
-- `WhileStmt`
 - `Block`
 - `Expr`
 - `Term`
@@ -89,21 +88,19 @@ Stmt     → Unmatched
 
 ```bnf
 Matched   → AssignStmt
-Matched   → WhileStmt
 Matched   → Block
 Matched   → IF LPAREN Bool RPAREN Matched ELSE Matched
+Matched   → WHILE LPAREN Bool RPAREN Matched
 
 Unmatched → IF LPAREN Bool RPAREN Stmt
 Unmatched → IF LPAREN Bool RPAREN Matched ELSE Unmatched
+Unmatched → WHILE LPAREN Bool RPAREN Unmatched
 ```
 
 ### 3.4 基本语句
 
 ```bnf
 AssignStmt → ID ASSIGN Expr SEMI
-
-WhileStmt  → WHILE LPAREN Bool RPAREN Stmt
-
 Block      → LBRACE StmtList RBRACE
 ```
 
@@ -206,13 +203,13 @@ RelExpr → Expr GT Expr
 5. Stmt → Matched
 6. Stmt → Unmatched
 7. Matched → AssignStmt
-8. Matched → WhileStmt
+8. Matched → WHILE ( Bool ) Matched
 9. Matched → Block
 10. Matched → IF ( Bool ) Matched ELSE Matched
 11. Unmatched → IF ( Bool ) Stmt
 12. Unmatched → IF ( Bool ) Matched ELSE Unmatched
-13. AssignStmt → ID = Expr ;
-14. WhileStmt → WHILE ( Bool ) Stmt
+13. Unmatched → WHILE ( Bool ) Unmatched
+14. AssignStmt → ID = Expr ;
 15. Block → { StmtList }
 
 算术与布尔部分继续顺序编号即可。
