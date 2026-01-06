@@ -5,6 +5,7 @@ from typing import List
 
 from .lexer import tokenize
 from .parser import parse_tokens
+from .ir import generate_ir
 from . import lalr
 from .utils import (
     StageResult,
@@ -37,7 +38,7 @@ def run_stage(stage: str, input_path: str) -> StageResult:
     elif normalized == "parse":
         generated.append(_emit_parse_trace(source_path, out_dir))
     elif normalized == "ir":
-        generated.append(_emit_ir(out_dir))
+        generated.append(generate_ir(source_path, out_dir))
     elif normalized == "opt":
         generated.extend(_emit_opt(out_dir))
     elif normalized == "codegen":
@@ -65,19 +66,13 @@ def _emit_action_goto(out_dir: Path) -> Path:
 def _emit_parse_trace(source_path: Path, out_dir: Path) -> Path:
     path = out_dir / "parse_trace.txt"
     tokens = tokenize(source_path)
-    trace = parse_tokens(tokens)
-    write_text_file(path, trace)
+    parse_result = parse_tokens(tokens)
+    write_text_file(path, parse_result.trace)
     return path
 
 
 def _emit_ir(out_dir: Path) -> Path:
-    path = out_dir / "ir.quad"
-    content = (
-        "# IR quad list (stub)\n"
-        "# format: index: (op, arg1, arg2, result)\n"
-    )
-    write_text_file(path, content)
-    return path
+    raise UserError("Error: IR generation requires source file path")
 
 
 def _emit_opt(out_dir: Path) -> List[Path]:
@@ -119,7 +114,7 @@ def _run_all(source_path: Path, out_dir: Path) -> List[Path]:
     generated.append(_emit_tokens(source_path, out_dir))
     generated.append(_emit_action_goto(out_dir))
     generated.append(_emit_parse_trace(source_path, out_dir))
-    generated.append(_emit_ir(out_dir))
+    generated.append(generate_ir(source_path, out_dir))
     generated.extend(_emit_opt(out_dir))
     generated.append(_emit_target(out_dir))
     return generated
