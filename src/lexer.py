@@ -31,6 +31,7 @@ class TokenType(str, Enum):
     RPAREN = "RPAREN"
     LBRACE = "LBRACE"
     RBRACE = "RBRACE"
+    EOF = "EOF"
 
 
 KEYWORDS = {

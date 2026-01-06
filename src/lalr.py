@@ -255,7 +255,9 @@ def merge_to_lalr(lr_states: List[LRState]) -> List[LALRState]:
     return lalr_states
 
 
-def generate_tables() -> Tuple[List[LALRState], List[str], List[str], Dict[int, Dict[str, str]], Dict[int, Dict[str, int]]]:
+def generate_tables(
+    verbose: bool = True,
+) -> Tuple[List[LALRState], List[str], List[str], Dict[int, Dict[str, str]], Dict[int, Dict[str, int]]]:
     lr_states = canonical_collection()
     terminals = sorted(t for t in GRAMMAR.terminals if t != "EOF")
     terminals.append("EOF")
@@ -263,21 +265,23 @@ def generate_tables() -> Tuple[List[LALRState], List[str], List[str], Dict[int, 
 
     # Diagnose canonical LR(1) conflicts without applying policies
     lr_conflicts = detect_conflicts(lr_states, terminals, nonterminals, label="LR(1)")
-    if lr_conflicts:
-        print(f"LR(1) conflicts: {len(lr_conflicts)}", file=sys.stderr)
-        for msg in lr_conflicts:
-            print(msg, file=sys.stderr)
-    else:
-        print("LR(1) conflicts: 0", file=sys.stderr)
+    if verbose:
+        if lr_conflicts:
+            print(f"LR(1) conflicts: {len(lr_conflicts)}", file=sys.stderr)
+            for msg in lr_conflicts:
+                print(msg, file=sys.stderr)
+        else:
+            print("LR(1) conflicts: 0", file=sys.stderr)
 
     lalr_states = merge_to_lalr(lr_states)
     lalr_conflicts = detect_conflicts(lalr_states, terminals, nonterminals, label="LALR(1)")
-    if lalr_conflicts:
-        print(f"LALR(1) conflicts: {len(lalr_conflicts)}", file=sys.stderr)
-        for msg in lalr_conflicts:
-            print(msg, file=sys.stderr)
-    else:
-        print("LALR(1) conflicts: 0", file=sys.stderr)
+    if verbose:
+        if lalr_conflicts:
+            print(f"LALR(1) conflicts: {len(lalr_conflicts)}", file=sys.stderr)
+            for msg in lalr_conflicts:
+                print(msg, file=sys.stderr)
+        else:
+            print("LALR(1) conflicts: 0", file=sys.stderr)
 
     # Build final tables (may apply dangling-else policy)
     try:

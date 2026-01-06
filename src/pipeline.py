@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List
 
 from .lexer import tokenize
+from .parser import parse_tokens
 from . import lalr
 from .utils import (
     StageResult,
@@ -34,7 +35,7 @@ def run_stage(stage: str, input_path: str) -> StageResult:
     elif normalized == "table":
         generated.append(_emit_action_goto(out_dir))
     elif normalized == "parse":
-        generated.append(_emit_parse_trace(out_dir))
+        generated.append(_emit_parse_trace(source_path, out_dir))
     elif normalized == "ir":
         generated.append(_emit_ir(out_dir))
     elif normalized == "opt":
@@ -61,13 +62,11 @@ def _emit_action_goto(out_dir: Path) -> Path:
     return path
 
 
-def _emit_parse_trace(out_dir: Path) -> Path:
+def _emit_parse_trace(source_path: Path, out_dir: Path) -> Path:
     path = out_dir / "parse_trace.txt"
-    content = (
-        "state_stack\tsymbol_stack\tremaining_input\taction\n"
-        "0\t<stub>\t<stub>\tshift (parser not implemented)\n"
-    )
-    write_text_file(path, content)
+    tokens = tokenize(source_path)
+    trace = parse_tokens(tokens)
+    write_text_file(path, trace)
     return path
 
 
@@ -119,7 +118,7 @@ def _run_all(source_path: Path, out_dir: Path) -> List[Path]:
     generated: List[Path] = []
     generated.append(_emit_tokens(source_path, out_dir))
     generated.append(_emit_action_goto(out_dir))
-    generated.append(_emit_parse_trace(out_dir))
+    generated.append(_emit_parse_trace(source_path, out_dir))
     generated.append(_emit_ir(out_dir))
     generated.extend(_emit_opt(out_dir))
     generated.append(_emit_target(out_dir))
