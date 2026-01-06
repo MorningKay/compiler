@@ -16,9 +16,17 @@ class BoolCode:
     false_list: List[int]
 
 
+@dataclass
+class Quad:
+    op: str
+    arg1: str
+    arg2: str
+    res: str
+
+
 class IRBuilder:
     def __init__(self) -> None:
-        self.quads: List[List[str]] = []
+        self.quads: List[Quad] = []
         self.temp_counter = 0
         self.label_counter = 0
 
@@ -32,7 +40,7 @@ class IRBuilder:
 
     def emit(self, op: str, arg1: str = "-", arg2: str = "-", res: str = "-") -> int:
         idx = len(self.quads)
-        self.quads.append([op, arg1, arg2, res])
+        self.quads.append(Quad(op, arg1, arg2, res))
         return idx
 
     def emit_label(self, label: str) -> int:
@@ -48,27 +56,31 @@ class IRBuilder:
         for idx in lst:
             if idx < 0 or idx >= len(self.quads):
                 raise UserError(f"Internal error: backpatch index out of range {idx}")
-            self.quads[idx][3] = label
+            quad = self.quads[idx]
+            self.quads[idx] = Quad(quad.op, quad.arg1, quad.arg2, label)
 
     def render(self) -> str:
         lines = []
-        for i, (op, a1, a2, res) in enumerate(self.quads):
-            lines.append(f"{i}: ({op}, {a1}, {a2}, {res})")
+        for i, q in enumerate(self.quads):
+            lines.append(f"{i}: ({q.op}, {q.arg1}, {q.arg2}, {q.res})")
         return "\n".join(lines) + "\n"
 
 
 def generate_ir(source_path: Path, out_dir: Path) -> Path:
+    builder = generate_ir_quads(source_path)
+    out_path = out_dir / "ir.quad"
+    write_text_file(out_path, builder.render())
+    return out_path
+
+
+def generate_ir_quads(source_path: Path) -> IRBuilder:
     tokens = tokenize(source_path)
     parse_result = parse_tokens(tokens)
     if parse_result.program is None:
         raise UserError("Internal error: parser did not return Program AST")
-
     builder = IRBuilder()
     _gen_program(parse_result.program, builder)
-
-    out_path = out_dir / "ir.quad"
-    write_text_file(out_path, builder.render())
-    return out_path
+    return builder
 
 
 def _gen_program(node: ast_nodes.Program, b: IRBuilder) -> None:

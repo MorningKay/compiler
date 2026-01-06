@@ -5,7 +5,8 @@ from typing import List
 
 from .lexer import tokenize
 from .parser import parse_tokens
-from .ir import generate_ir
+from .ir import generate_ir, generate_ir_quads
+from .cfg import build_cfg, render_cfg
 from . import lalr
 from .utils import (
     StageResult,
@@ -18,7 +19,7 @@ from .utils import (
     write_action_goto_csv,
 )
 
-SUPPORTED_STAGES = ["lexer", "table", "parse", "ir", "opt", "codegen", "all"]
+SUPPORTED_STAGES = ["lexer", "table", "parse", "ir", "cfg", "opt", "codegen", "all"]
 
 
 def run_stage(stage: str, input_path: str) -> StageResult:
@@ -39,6 +40,8 @@ def run_stage(stage: str, input_path: str) -> StageResult:
         generated.append(_emit_parse_trace(source_path, out_dir))
     elif normalized == "ir":
         generated.append(generate_ir(source_path, out_dir))
+    elif normalized == "cfg":
+        generated.append(_emit_cfg(source_path, out_dir))
     elif normalized == "opt":
         generated.extend(_emit_opt(out_dir))
     elif normalized == "codegen":
@@ -73,6 +76,14 @@ def _emit_parse_trace(source_path: Path, out_dir: Path) -> Path:
 
 def _emit_ir(out_dir: Path) -> Path:
     raise UserError("Error: IR generation requires source file path")
+
+
+def _emit_cfg(source_path: Path, out_dir: Path) -> Path:
+    builder = generate_ir_quads(source_path)
+    blocks = build_cfg(builder)
+    cfg_path = out_dir / "cfg.txt"
+    write_text_file(cfg_path, render_cfg(blocks))
+    return cfg_path
 
 
 def _emit_opt(out_dir: Path) -> List[Path]:
@@ -115,6 +126,7 @@ def _run_all(source_path: Path, out_dir: Path) -> List[Path]:
     generated.append(_emit_action_goto(out_dir))
     generated.append(_emit_parse_trace(source_path, out_dir))
     generated.append(generate_ir(source_path, out_dir))
+    generated.append(_emit_cfg(source_path, out_dir))
     generated.extend(_emit_opt(out_dir))
     generated.append(_emit_target(out_dir))
     return generated
