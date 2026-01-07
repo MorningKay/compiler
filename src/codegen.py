@@ -78,12 +78,19 @@ def _gen_asm(quads: List[Quad]) -> List[str]:
             lines.append(q.op)
             lines.append(f"STORE {q.res}")
             continue
-        if q.op in {"IF_GT", "IF_LT", "IF_EQ", "IF_NE"}:
+        if q.op in {"IF_GT", "IF_LT", "IF_EQ", "IF_NE", "IF_LE", "IF_GE"}:
             _emit_load(q.arg1, lines)
             _emit_load(q.arg2, lines)
-            cmp_op = {"IF_GT": "GT", "IF_LT": "LT", "IF_EQ": "EQ", "IF_NE": "NE"}[q.op]
-            lines.append(cmp_op)
-            lines.append(f"JNZ {q.res}")
+            if q.op in {"IF_GT", "IF_LT", "IF_EQ", "IF_NE"}:
+                cmp_op = {"IF_GT": "GT", "IF_LT": "LT", "IF_EQ": "EQ", "IF_NE": "NE"}[q.op]
+                lines.append(cmp_op)
+                lines.append(f"JNZ {q.res}")
+            elif q.op == "IF_LE":
+                lines.append("GT")
+                lines.append(f"JZ {q.res}")
+            elif q.op == "IF_GE":
+                lines.append("LT")
+                lines.append(f"JZ {q.res}")
             continue
         raise UserError(f"Internal error: unsupported op {q.op}")
     lines.append("HALT")

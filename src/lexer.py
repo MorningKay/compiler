@@ -22,6 +22,8 @@ class TokenType(str, Enum):
     NE = "NE"
     LT = "LT"
     GT = "GT"
+    LE = "LE"
+    GE = "GE"
     PLUS = "PLUS"
     MINUS = "MINUS"
     MUL = "MUL"
@@ -102,18 +104,29 @@ def tokenize(path: str | Path) -> List[Token]:
                 i += 1
                 col += 1
             lexeme = text[start:i]
+            if i < len(text) and (text[i].isalpha() or text[i] == "_"):
+                raise UserError(
+                    f"Error {start_line}:{start_col}: Invalid identifier starting with digit"
+                )
             tokens.append(Token(len(tokens), TokenType.NUM, lexeme, start_line, start_col))
             continue
 
         # Two-char operators
         two_char = text[i : i + 2]
-        if two_char in ("==", "!="):
+        if two_char in ("==", "!=", "<=", ">="):
             # Reject triple operators like "===" or "!=="
-            if i + 2 < len(text) and text[i + 2] == "=":
+            if two_char in ("==", "!=") and i + 2 < len(text) and text[i + 2] == "=":
                 raise UserError(
                     f"Error {start_line}:{start_col + 2}: Expected valid token, but got CHAR('=')"
                 )
-            tt = TokenType.EQ if two_char == "==" else TokenType.NE
+            if two_char == "==":
+                tt = TokenType.EQ
+            elif two_char == "!=":
+                tt = TokenType.NE
+            elif two_char == "<=":
+                tt = TokenType.LE
+            else:
+                tt = TokenType.GE
             tokens.append(Token(len(tokens), tt, two_char, start_line, start_col))
             i += 2
             col += 2

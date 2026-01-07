@@ -263,9 +263,13 @@ def _build_node(prod_id: int, vals: List[object]) -> object | None:
         op = "IF_LT"
     elif prod_id == 36:
         op = "IF_GT"
+    elif prod_id == 37:
+        op = "IF_LE"
+    elif prod_id == 38:
+        op = "IF_GE"
     else:
         return None
-    if prod_id in (33, 34, 35, 36):
+    if prod_id in (33, 34, 35, 36, 37, 38):
         left = vals[0]  # type: ignore[assignment]
         right = vals[2]  # type: ignore[assignment]
         return ast_nodes.RelOp(op=op, left=left, right=right)

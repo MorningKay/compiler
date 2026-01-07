@@ -38,6 +38,8 @@ TERMINALS: Set[str] = {
     "NE",
     "LT",
     "GT",
+    "LE",
+    "GE",
     "LPAREN",
     "RPAREN",
     "LBRACE",
@@ -103,6 +105,8 @@ PRODUCTIONS: List[Production] = [
     Production(34, "RelExpr", ("Expr", "NE", "Expr")),
     Production(35, "RelExpr", ("Expr", "LT", "Expr")),
     Production(36, "RelExpr", ("Expr", "GT", "Expr")),
+    Production(37, "RelExpr", ("Expr", "LE", "Expr")),
+    Production(38, "RelExpr", ("Expr", "GE", "Expr")),
 ]
 
 GRAMMAR = Grammar(
