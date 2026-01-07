@@ -9,7 +9,9 @@ from .utils import UserError, write_text_file
 
 
 def emit_target(source_path: Path, out_dir: Path) -> Path:
-    ir_opt_path, _ = optimize_ir(source_path, out_dir)
+    ir_opt_path = out_dir / "ir_opt.quad"
+    if not ir_opt_path.exists():
+        ir_opt_path, _ = optimize_ir(source_path, out_dir)
     quads = _parse_ir_file(ir_opt_path)
     _validate_labels(quads)
     asm_lines = _gen_asm(quads)

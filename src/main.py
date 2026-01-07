@@ -59,6 +59,8 @@ def main(argv: list[str] | None = None) -> None:
             print(f"  {path}")
     else:
         print("No files were generated.")
+    if result.stage == "all":
+        print(f"Success: output written to {result.output_dir}")
 
 
 if __name__ == "__main__":
