@@ -43,7 +43,7 @@ def run_stage(stage: str, input_path: str) -> StageResult:
     elif normalized == "cfg":
         generated.append(_emit_cfg(source_path, out_dir))
     elif normalized == "opt":
-        generated.extend(_emit_opt(out_dir))
+        generated.extend(_emit_opt(source_path, out_dir))
     elif normalized == "codegen":
         generated.append(_emit_target(out_dir))
     elif normalized == "all":
@@ -86,27 +86,10 @@ def _emit_cfg(source_path: Path, out_dir: Path) -> Path:
     return cfg_path
 
 
-def _emit_opt(out_dir: Path) -> List[Path]:
-    ir_opt = out_dir / "ir_opt.quad"
-    report = out_dir / "opt_report.txt"
+def _emit_opt(source_path: Path, out_dir: Path) -> List[Path]:
+    from .opt import optimize_ir
 
-    write_text_file(
-        ir_opt,
-        "# Optimized IR quad list (stub)\n# format: index: (op, arg1, arg2, result)\n",
-    )
-
-    report_lines = [
-        "Pass pipeline: constant-folding -> dead-code-elimination (stub)",
-        "Basic blocks:",
-        "  B0: start -> <none>",
-        "Changes:",
-        "  removed indices: []",
-        "  replacements: []",
-        "Stats:",
-        "  before: 0 instructions",
-        "  after: 0 instructions",
-    ]
-    write_text_file(report, "\n".join(report_lines) + "\n")
+    ir_opt, report = optimize_ir(source_path, out_dir)
     return [ir_opt, report]
 
 

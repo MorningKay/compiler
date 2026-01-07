@@ -22,6 +22,7 @@ class Quad:
     arg1: str
     arg2: str
     res: str
+    orig_index: int | None = None
 
 
 class IRBuilder:
@@ -40,7 +41,7 @@ class IRBuilder:
 
     def emit(self, op: str, arg1: str = "-", arg2: str = "-", res: str = "-") -> int:
         idx = len(self.quads)
-        self.quads.append(Quad(op, arg1, arg2, res))
+        self.quads.append(Quad(op, arg1, arg2, res, orig_index=idx))
         return idx
 
     def emit_label(self, label: str) -> int:
@@ -57,7 +58,7 @@ class IRBuilder:
             if idx < 0 or idx >= len(self.quads):
                 raise UserError(f"Internal error: backpatch index out of range {idx}")
             quad = self.quads[idx]
-            self.quads[idx] = Quad(quad.op, quad.arg1, quad.arg2, label)
+            self.quads[idx] = Quad(quad.op, quad.arg1, quad.arg2, label, quad.orig_index)
 
     def render(self) -> str:
         lines = []
