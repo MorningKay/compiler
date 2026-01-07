@@ -10,3 +10,6 @@ __pycache__/
 
 # Output directory
 out
+
+# Report
+latex_template/
