@@ -161,5 +161,27 @@ def tokenize(path: str | Path) -> List[Token]:
     return tokens
 
 
+@dataclass
+class SymbolEntry:
+    name: str
+    first_seen: str
+    count: int
+
+
+def build_symbol_table(tokens: List[Token]) -> List[SymbolEntry]:
+    seen: dict[str, SymbolEntry] = {}
+    for tok in tokens:
+        if tok.type != TokenType.ID:
+            continue
+        entry = seen.get(tok.lexeme)
+        if entry is None:
+            seen[tok.lexeme] = SymbolEntry(
+                name=tok.lexeme, first_seen=f"{tok.line}:{tok.col}", count=1
+            )
+        else:
+            entry.count += 1
+    return sorted(seen.values(), key=lambda e: e.name)
+
+
 def _peek(text: str, idx: int) -> str:
     return text[idx + 1] if idx + 1 < len(text) else ""

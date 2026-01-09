@@ -1,12 +1,13 @@
-English | [中文](README_zh.md)
-
 # MiniLang Compiler
+
+English | [中文](README_zh.md)
 
 ## Overview
 This project implements a MiniLang compiler as a staged course project (M0~M9). Each milestone builds a piece of the toolchain, from lexical analysis through LALR(1) parsing, IR generation with backpatching, CFG construction, local optimizations, and stack-machine codegen. All stages can be run individually or via a single `--stage all` pipeline that writes every artifact into `out/<input_name>/`.
 
 ## Features
 - Lexer → `tokens.csv`
+- Lexer also emits symbol table → `symtab.txt` (identifiers, first occurrence, count)
 - LALR(1) table generation → `action_goto.csv`
 - Shift/reduce parser → `parse_trace.txt` with English syntax errors (Expected tokens)
 - IR (quads) with backpatch → `ir.quad`

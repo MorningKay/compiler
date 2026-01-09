@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List
 
-from .lexer import tokenize
+from .lexer import tokenize, build_symbol_table
 from .parser import parse_tokens
 from .ir import generate_ir, generate_ir_quads
 from .cfg import build_cfg, render_cfg
@@ -18,6 +18,7 @@ from .utils import (
     write_text_file,
     write_tokens_csv,
     write_action_goto_csv,
+    write_symtab_txt,
 )
 
 SUPPORTED_STAGES = ["lexer", "table", "parse", "ir", "cfg", "opt", "codegen", "all"]
@@ -34,7 +35,7 @@ def run_stage(stage: str, input_path: str) -> StageResult:
     generated: List[Path] = []
 
     if normalized == "lexer":
-        generated.append(_emit_tokens(source_path, out_dir))
+        generated.extend(_emit_tokens(source_path, out_dir))
     elif normalized == "table":
         generated.append(_emit_action_goto(out_dir))
     elif normalized == "parse":
@@ -53,11 +54,14 @@ def run_stage(stage: str, input_path: str) -> StageResult:
     return StageResult(stage=normalized, output_dir=out_dir, generated=generated)
 
 
-def _emit_tokens(source_path: Path, out_dir: Path) -> Path:
-    path = out_dir / "tokens.csv"
+def _emit_tokens(source_path: Path, out_dir: Path) -> List[Path]:
+    tokens_path = out_dir / "tokens.csv"
+    symtab_path = out_dir / "symtab.txt"
     tokens = tokenize(source_path)
-    write_tokens_csv(path, tokens)
-    return path
+    write_tokens_csv(tokens_path, tokens)
+    sym_entries = build_symbol_table(tokens)
+    write_symtab_txt(symtab_path, sym_entries)
+    return [tokens_path, symtab_path]
 
 
 def _emit_action_goto(out_dir: Path) -> Path:
@@ -100,7 +104,7 @@ def _emit_target(source_path: Path, out_dir: Path) -> Path:
 
 def _run_all(source_path: Path, out_dir: Path) -> List[Path]:
     generated: List[Path] = []
-    generated.append(_emit_tokens(source_path, out_dir))
+    generated.extend(_emit_tokens(source_path, out_dir))
     generated.append(_emit_action_goto(out_dir))
     generated.append(_emit_parse_trace(source_path, out_dir))
     generated.append(generate_ir(source_path, out_dir))

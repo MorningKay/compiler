@@ -62,6 +62,15 @@ def write_tokens_csv(path: Path, tokens: List["Token"]) -> None:
             writer.writerow([tok.index, tok.type, tok.lexeme, tok.line, tok.col])
 
 
+def write_symtab_txt(path: Path, entries) -> None:
+    """Write symbol table entries to a tab-delimited txt."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as fp:
+        fp.write("Name\tFirstSeen\tCount\n")
+        for e in entries:
+            fp.write(f"{e.name}\t{e.first_seen}\t{e.count}\n")
+
+
 def write_text_file(path: Path, content: str) -> None:
     """Write plain text content to a file, ensuring the directory exists."""
     path.parent.mkdir(parents=True, exist_ok=True)

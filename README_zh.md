@@ -1,12 +1,13 @@
-[English](README.md) | 中文
-
 # MiniLang 编译器
+
+[English](README.md) | 中文
 
 ## 简介
 这是一个 MiniLang 编译器课程项目，按里程碑从词法到栈机代码逐步实现。各阶段可独立运行，也可用 `--stage all` 一次生成所有产物，输出统一写入 `out/<输入文件名>/`。
 
 ## 功能
 - 词法分析 → `tokens.csv`
+- 词法阶段输出符号表 → `symtab.txt`（标识符、首出现位置、次数）
 - LALR(1) 表生成 → `action_goto.csv`
 - 移入-归约语法分析 → `parse_trace.txt`，英文错误含 Expected 列表
 - 四元式 IR + 回填 → `ir.quad`
