@@ -1,3 +1,10 @@
+# MacOS
+.DS_Store
+._*
+
+# Word
+~$*
+
 # Project doc
 ok---编译原理实践--设计指导参考.docx
 
@@ -13,3 +20,4 @@ out
 
 # Report
 latex_template/
+编译原理课程设计实验报告.docx
