@@ -17,7 +17,7 @@ from .utils import (
 class MiniLangGUI:
     def __init__(self, initial_file: Path | None = None) -> None:
         self.root = tk.Tk()
-        self.root.title("MiniLang Compiler (M0 stub)")
+        self.root.title("MiniLang Compiler")
         self.file_path: Path | None = None
 
         self.output_var = tk.StringVar(value="Select a file to see output location.")
@@ -45,10 +45,17 @@ class MiniLangGUI:
         menubar.add_cascade(label="File", menu=file_menu)
 
         run_menu = tk.Menu(menubar, tearoff=0)
-        for stage in ["lexer", "table", "parse", "ir", "opt", "codegen", "all"]:
-            run_menu.add_command(
-                label=stage.capitalize(), command=lambda s=stage: self._run_stage(s)
-            )
+        for label, stage in [
+            ("Lexer", "lexer"),
+            ("Table", "table"),
+            ("Parse", "parse"),
+            ("IR", "ir"),
+            ("CFG", "cfg"),
+            ("Opt", "opt"),
+            ("Codegen", "codegen"),
+            ("All", "all"),
+        ]:
+            run_menu.add_command(label=label, command=lambda s=stage: self._run_stage(s))
         menubar.add_cascade(label="Run", menu=run_menu)
 
         view_menu = tk.Menu(menubar, tearoff=0)
@@ -71,6 +78,7 @@ class MiniLangGUI:
             ("Table", "table"),
             ("Parse", "parse"),
             ("IR", "ir"),
+            ("CFG", "cfg"),
             ("Opt", "opt"),
             ("Codegen", "codegen"),
         ]:
